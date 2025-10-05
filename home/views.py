@@ -87,13 +87,34 @@ class ForecastAPI(APIView):
                     "api-key": AZURE_KEY
                 }
                 messages = [
-                    {"role": "system", "content": "You are a weather summary assistant."},
-                    {"role": "user", "content": f"Here are the 7-day forecasts:\n{json.dumps(forecasts)}\nPlease provide a JSON summary."}
+                    {"role": "system", "content": (
+                        "You are a highly intelligent, concise weather assistant. "
+                        "Your task is to interpret 7-day hyperlocal weather forecast data and provide an actionable, judge-ready summary. "
+                        "Focus on clarity, probabilities, and risk categories. "
+                        "Output strictly in JSON format without extra text."
+                    )},
+                    {"role": "user", "content": (
+                        f"Here are the 7-day forecasts for a user's event:\n{json.dumps(forecasts)}\n\n"
+                        "Please generate a JSON summary that includes:\n"
+                        "1. 'summary': A short, clear human-readable paragraph highlighting major risks and safe days.\n"
+                        "2. 'alerts': List of days with high probability (>50%) of 'very_hot', 'very_cold', 'very_wet', or 'very_windy' conditions.\n"
+                        "3. 'recommendation': Best day(s) for the event based on lowest combined weather risk.\n"
+                        "4. 'average_conditions': Average temperature, precipitation, wind speed, and humidity over 7 days.\n\n"
+                        "Use the following JSON structure strictly:\n"
+                        "{\n"
+                        '  "summary": "",\n'
+                        '  "alerts": [{"date": "", "conditions": []}],\n'
+                        '  "recommendation": [],\n'
+                        '  "average_conditions": {"temperature": 0, "precipitation": 0, "wind_speed": 0, "humidity": 0}\n'
+                        "}"
+                    )}
                 ]
+
 
                 azure_payload = {
                     "messages": messages,
-                    "max_tokens": 500
+                    "max_tokens": 500,
+                    "temperature": 0.3
                 }
 
                 azure_response = requests.post(azure_url, headers=azure_headers, json=azure_payload, timeout=60)
