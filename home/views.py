@@ -158,7 +158,7 @@ class ForecastAPI(APIView):
             
 class DownloadWeatherCSV(APIView):
     permission_classes = [AllowAny]  
-    def get(self, request, q):
+    def get(self, request):
         query_id = request.query_params.get("query_id")
         if not query_id:
             return Response({"status": False, "message": "query_id is required"})
